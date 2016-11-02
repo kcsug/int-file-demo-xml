@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-file="http://www.springframework.org/schema/integration/file"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+	<task:executor id="file-demo-xml" pool-size="10" />
+	
+	<int:poller default="true" id="notHenryDavidThoreausPoller" fixed-rate="1000" task-executor="file-demo-xml" />
+
+	<int-file:inbound-channel-adapter directory="/home/ryan/int/input/" id="fileInputAdapter" channel="fileInput" />
+		
+	<int:channel id="fileInput" /> 
+	
+	<int-file:file-to-string-transformer input-channel="fileInput" output-channel="transformOutput" />
+	
+	<int:channel id="transformOutput"  />
+	
+	<bean id="textHandler" class="com.example.StringReceiver" />
+	
+	<int:service-activator input-channel="transformOutput" ref="textHandler" method="process" requires-reply="false" />
+	
+</beans>
